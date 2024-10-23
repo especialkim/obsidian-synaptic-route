@@ -35,7 +35,7 @@ export class KeywordCloud {
 
     /* Main Functions*/
 
-    process() {
+    public process() {
         try {
             this.el.empty();
  
@@ -98,6 +98,25 @@ export class KeywordCloud {
 
     /* Sub Functions*/
 
+    private render(arrKeywordCloudData: KeywordCloudData[]): string {
+
+        const renderType = this.options.type.toLowerCase();
+
+        if(renderType === 'wordcloud'){
+            return this.getWordCloudHTMLFromArrKeywordCloudData(arrKeywordCloudData);
+        }
+        if(renderType == 'table'){
+            return this.keywordTable.getTableHTMLFromArrKeywordCloudData(arrKeywordCloudData);
+        }
+        if(renderType == 'chart'){
+            return this.keywordChart.getChartHTMLFromArrKeywordCloudData(arrKeywordCloudData);
+        }
+
+        // const html = this.getHTMLFromArrKeywordCloudData(arrKeywordCloudData);
+
+        return ''
+    }
+
     private addButtons() {
         this.addButtonContainer();
         this.addRefreshButton();
@@ -138,26 +157,7 @@ export class KeywordCloud {
         });
     }
 
-    render(arrKeywordCloudData: KeywordCloudData[]): string {
-
-        const renderType = this.options.type.toLowerCase();
-
-        if(renderType === 'wordcloud'){
-            return this.getWordCloudHTMLFromArrKeywordCloudData(arrKeywordCloudData);
-        }
-        if(renderType == 'table'){
-            return this.keywordTable.getTableHTMLFromArrKeywordCloudData(arrKeywordCloudData);
-        }
-        if(renderType == 'chart'){
-            return this.keywordChart.getChartHTMLFromArrKeywordCloudData(arrKeywordCloudData);
-        }
-
-        // const html = this.getHTMLFromArrKeywordCloudData(arrKeywordCloudData);
-
-        return ''
-    }
-
-    getWordCloudHTMLFromArrKeywordCloudData(arrKeywordCloudData: KeywordCloudData[]): string {
+    private getWordCloudHTMLFromArrKeywordCloudData(arrKeywordCloudData: KeywordCloudData[]): string {
         // Shuffle the array to randomize the order of keywords
         const keywordType = this.settings.keywordSelectionMethod;
         const shuffledData = this.obsidianUtils.shuffledArray([...arrKeywordCloudData]);
@@ -200,7 +200,7 @@ export class KeywordCloud {
         return innerContent;
     }
 
-    getArrObjMatchedKeywordFromArrPath(arrPath: string[]): MatchedKeyword[] {
+    private getArrObjMatchedKeywordFromArrPath(arrPath: string[]): MatchedKeyword[] {
         let result: MatchedKeyword[] = [];
         arrPath.forEach(path => {
             const objMatchedKeyword = this.getObjMatchedKeywordFromPath(path);
@@ -210,7 +210,7 @@ export class KeywordCloud {
         return result;
     }
 
-    getObjMatchedKeywordFromPath(path: string): MatchedKeyword {
+    private getObjMatchedKeywordFromPath(path: string): MatchedKeyword {
 
         const keywordsType = this.settings.keywordSelectionMethod;
         let keywords: string[] = [];
@@ -242,14 +242,14 @@ export class KeywordCloud {
         };
     }
 
-    getArrPathOfLiteratureCardFromArrayPath(arrPath: string[]): string[] {
+    private getArrPathOfLiteratureCardFromArrayPath(arrPath: string[]): string[] {
         const result: string[] = arrPath
             .filter(path => this.isLiteratureNote(path));
         return result;
 
     }
 
-    isLiteratureNote(path: string): boolean {
+    private isLiteratureNote(path: string): boolean {
         const queryType = this.settings.literatureNoteSelectionMethod;
         if(queryType === 'tags'){
             const tags = this.obsidianUtils.getArrTagFromPath(path);
@@ -261,7 +261,6 @@ export class KeywordCloud {
         }else if(queryType === 'fileNameSuffix'){
             const fileName = this.obsidianUtils.getFileNameFromPath(path);
             const input = this.settings.literatureNoteSelectionInput;
-            console.log(fileName.endsWith(input) || fileName.replace('.md', '').endsWith(input));
             return fileName.endsWith(input) || fileName.replace('.md', '').endsWith(input);
         }else if(queryType === 'fileNameRegex'){
             const fileName = this.obsidianUtils.getFileNameFromPath(path);
@@ -273,13 +272,13 @@ export class KeywordCloud {
         return false;
     }
 
-    getArrPathOfMainCardFromArrayPath(arrPath: string[]): string[] {
+    private getArrPathOfMainCardFromArrayPath(arrPath: string[]): string[] {
         const result: string[] = arrPath
             .filter(path => this.isMainCard(path));
         return result;
     }
 
-    isMainCard(path: string): boolean {
+    private isMainCard(path: string): boolean {
         const queryType = this.settings.permanentNoteSelectionMethod;
 
         if(queryType === 'tags'){
@@ -292,7 +291,6 @@ export class KeywordCloud {
         }else if(queryType === 'fileNameSuffix'){
             const fileName = this.obsidianUtils.getFileNameFromPath(path);
             const input = this.settings.permanentNoteSelectionInput;
-            console.log(fileName.endsWith(input) || fileName.replace('.md', '').endsWith(input));
             return fileName.endsWith(input) || fileName.replace('.md', '').endsWith(input);
         }else if(queryType === 'fileNameRegex'){
             const fileName = this.obsidianUtils.getFileNameFromPath(path);
@@ -305,7 +303,7 @@ export class KeywordCloud {
         return false;
     }
 
-    isKeyword(path: string): boolean {
+    private isKeyword(path: string): boolean {
         const queryType = this.settings.keywordSelectionMethod;
         const queryInput = this.settings.keywordSelectionInput;
 
@@ -322,7 +320,7 @@ export class KeywordCloud {
         return false;
     }
 
-    executeFilterOption(arrPath: string[]): string[] {
+    private executeFilterOption(arrPath: string[]): string[] {
         const excludeFileNamePatterns = this.settings.excludeFileNamePatterns;
         const excludeTags = this.settings.excludeTags;
         const excludeFolders = this.settings.excludeFolders;
@@ -363,7 +361,7 @@ export class KeywordCloud {
         }
     }
 
-    getArrKeywordCloudWithoutCloudFactorFromArrNameOfKeyword(arrNameOfKeyword: string[]): KeywordCloudData[] {
+    private getArrKeywordCloudWithoutCloudFactorFromArrNameOfKeyword(arrNameOfKeyword: string[]): KeywordCloudData[] {
         // 키워드 카운트
         const keywordCounts = arrNameOfKeyword.reduce((acc, keyword) => {
             acc[keyword] = (acc[keyword] || 0) + 1;
@@ -386,7 +384,7 @@ export class KeywordCloud {
         }));
     }
 
-    getCountOfInlinkFromKeywordDisplayName(keywordName: string): number {
+    private getCountOfInlinkFromKeywordDisplayName(keywordName: string): number {
         const typeOfKeywordInlink = this.settings.keywordBacklinkType;
         
         const arrTFileOfAllFile = this.obsidianUtils.getAllTFileOfVault();
@@ -410,7 +408,7 @@ export class KeywordCloud {
         return inlinksCount;
     }
 
-    getArrKeywordCloudDataFromArrNameOfKeyword(keywordCloudDataWithoutCloudFactor: KeywordCloudData[]): KeywordCloudData[] {
+    private getArrKeywordCloudDataFromArrNameOfKeyword(keywordCloudDataWithoutCloudFactor: KeywordCloudData[]): KeywordCloudData[] {
         const scores = keywordCloudDataWithoutCloudFactor.map(item => item.score);
         const minScore = Math.min(...scores);
         const maxScore = Math.max(...scores);

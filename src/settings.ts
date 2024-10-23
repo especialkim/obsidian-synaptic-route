@@ -41,7 +41,7 @@ export class SynapticRouteSettingTab extends PluginSettingTab {
         const { containerEl } = this;
 
         containerEl.empty();
-
+        containerEl.createEl('h1', {text: '관련 키워드 시각화'});
         containerEl.createEl('h2', {text: '키워드 선별 방식'});
 
         // Keyword Selection Method
