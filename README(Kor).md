@@ -42,9 +42,7 @@ Theme: Dark|Light
 - **MaxRandomItem**: MaxItem 초과 시 포함할 랜덤 항목 수 (기본값: 5)
 - **Theme**: 시각적 테마 (기본값: Dark)
 
-## 설정
-
-### 플러그인 설정
+## 플러그인 설정
 
 플러그인 설정에서 다음 항목들을 구성할 수 있습니다:
 
@@ -62,7 +60,7 @@ Theme: Dark|Light
    - 제외할 태그
    - 제외할 파일명 패턴
 
-### Style Settings
+## Style Settings
 
 [Style Settings](https://github.com/mgmeyers/obsidian-style-settings) 플러그인을 통해 다음과 같은 스타일 설정이 가능합니다:
 

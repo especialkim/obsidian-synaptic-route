@@ -46,9 +46,7 @@ Theme: Dark|Light
 - **MaxRandomItem**: Number of random items to include when exceeding MaxItem (default: 5)
 - **Theme**: Visual theme (default: Dark)
 
-## Settings
-
-### Plugin Settings
+## Plugin Settings
 
 Configure the following items in the plugin settings:
 
@@ -66,7 +64,7 @@ Configure the following items in the plugin settings:
    - Exclude tags
    - Exclude file name patterns
 
-### Style Settings
+## Style Settings
 
 Through the [Style Settings](https://github.com/mgmeyers/obsidian-style-settings) plugin, you can customize the following styles:
 
