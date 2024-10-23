@@ -1,4 +1,4 @@
-import { Plugin } from 'obsidian';
+import { MarkdownView, Plugin } from 'obsidian';
 import { CodeblockRouter } from './src/codeblockRouter';
 import { ObsidianUtils } from './src/obsidianUtils';
 import { SynapticRouteSettings, DEFAULT_SETTINGS, SynapticRouteSettingTab } from './src/settings';
@@ -17,13 +17,14 @@ export default class SynapticRoute extends Plugin {
 			this.codeblockRouter.processCodeblock("SynapticRoute", source, el, ctx);
 		});
 
-		this.addCommand({
-			id: 'print-synaptic-route-settings',
-			name: 'Print Settings',
-			callback: () => {
-				console.log('Current Synaptic Route Settings:', this.settings);
-			}
-		});
+		// For debugging
+		// this.addCommand({
+		// 	id: 'print-synaptic-route-settings',
+		// 	name: 'Print Settings',
+		// 	callback: () => {
+		// 		console.log('Current Synaptic Route Settings:', this.settings);
+		// 	}
+		// });
 
 		this.addSettingTab(new SynapticRouteSettingTab(this.app, this));
 	}
@@ -38,6 +39,17 @@ export default class SynapticRoute extends Plugin {
 
 	async saveSettings(): Promise<void> {
 		await this.saveData(this.settings);
+		// 설정이 저장될 때마다 모든 마크다운 뷰를 리프레시
+		this.refreshAllMarkdownViews();
+	}
+
+	private refreshAllMarkdownViews(): void {
+		// 현재 열려있는 모든 마크다운 뷰를 새로고침
+		this.app.workspace.getLeavesOfType('markdown').forEach(leaf => {
+			if (leaf.view instanceof MarkdownView) {
+				leaf.view.previewMode.rerender(true);
+			}
+		});
 	}
 }
 

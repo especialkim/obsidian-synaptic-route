@@ -1,96 +1,75 @@
-# Obsidian Sample Plugin
+# Synaptic Route Plugin for Obsidian
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+## 환영합니다! 👋
 
-This project uses TypeScript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in TypeScript Definition format, which contains TSDoc comments describing what it does.
+Synaptic Route는 당신의 노트들 사이의 키워드 연결 관계를 시각적으로 보여주는 옵시디언 플러그인입니다. 키워드 클라우드, 차트, 테이블 등 다양한 방식으로 노트 간의 연결 관계를 탐색할 수 있습니다.
 
-**Note:** The Obsidian API is still in early alpha and is subject to change at any time!
+## 이 플러그인으로 할 수 있는 것
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open Sample Modal" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
+- 노트들 사이의 키워드 관계를 시각화
+- 키워드 클라우드, 차트, 테이블 형태로 데이터 표현
+- 연결된 노트들의 키워드 분석
+- Lucy Zettelkasten 워크플로우 지원
+- 다크/라이트 테마 지원
 
-## First time developing plugins?
+## 얻을 수 있는 효과
 
-Quick starting guide for new plugin devs:
+- 노트 간의 숨겨진 연결 관계 발견
+- 키워드 기반의 효율적인 노트 탐색
+- 지식 구조의 시각적 이해
+- 연구 및 학습 패턴 분석
+- 효과적인 지식 관리
 
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+## 사용 방법
 
-## Releasing new releases
+코드블록을 사용하여 간단히 시각화를 추가할 수 있습니다:
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
-
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
-
-## Adding your plugin to the community plugin list
-
-- Check the [plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines).
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
-
-## How to use
-
-- Clone this repo.
-- Make sure your NodeJS is at least v16 (`node --version`).
-- `npm i` or `yarn` to install dependencies.
-- `npm run dev` to start compilation in watch mode.
-
-## Manually installing the plugin
-
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
-
-## Improve code quality with eslint (optional)
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code. 
-- To use eslint with this project, make sure to install eslint from terminal:
-  - `npm install -g eslint`
-- To use eslint to analyze this project use this command:
-  - `eslint main.ts`
-  - eslint will then create a report with suggestions for code improvement by file and line number.
-- If your source code is in a folder, such as `src`, you can use eslint with this command to analyze all files in that folder:
-  - `eslint .\src\`
-
-## Funding URL
-
-You can include funding URLs where people who use your plugin can financially support it.
-
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
-
-```json
-{
-    "fundingUrl": "https://buymeacoffee.com"
-}
+```SynapticRoute
+Type: WordCloud
 ```
 
-If you have multiple URLs, you can also do:
+### 기본 설정 옵션
 
-```json
-{
-    "fundingUrl": {
-        "Buy Me a Coffee": "https://buymeacoffee.com",
-        "GitHub Sponsor": "https://github.com/sponsors",
-        "Patreon": "https://www.patreon.com/"
-    }
-}
-```
+- **Type**: 시각화 유형 선택
+  - `WordCloud`: 키워드 클라우드 (기본값)
+  - `Chart`: 차트 형태
+  - `Table`: 테이블 형태
 
-## API Documentation
+- **ChartType**: 차트 유형 (Type이 Chart일 때만 적용)
+  - `Bar`: 막대 차트 (기본값)
+  - `Pie`: 파이 차트
+  - `Polar`: 폴라 차트
+  - `Radar`: 레이더 차트
 
-See https://github.com/obsidianmd/obsidian-api
+- **Global**: 전체 노트 포함 여부
+  - `true`: 모든 노트 포함
+  - `false`: 현재 노트와 연결된 노트만 포함 (기본값)
+
+- **MaxItem**: 표시할 최대 항목 수 (기본값: 30)
+
+- **MaxRandomItem**: 최대 항목 초과 시 랜덤 선택할 항목 수 (기본값: 5)
+
+- **Theme**: 시각화 테마
+  - `Dark`: 다크 테마
+  - `Light`: 라이트 테마
+  - `Default`: 옵시디언 테마 따르기
+
+## 플러그인 설정
+
+플러그인 설정에서 다음과 같은 옵션을 구성할 수 있습니다:
+
+### 키워드 선별 방식
+- 태그, 파일명 접두사/접미사, 정규표현식 등으로 키워드 식별
+- 키워드 백링크 유형 설정 (전체 노트 또는 영구 노트만)
+
+### Lucy Zettelkasten 옵션
+- 문헌 노트와 영구 노트의 선별 방식 설정
+- 자동 연결 및 분석 기능
+
+### 필터링 옵션
+- 제외할 폴더 지정
+- 제외할 태그 설정
+- 파일명 패턴 기반 필터링
+
+## 활용 예시
+

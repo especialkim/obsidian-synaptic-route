@@ -2,6 +2,7 @@ import { Chart, ChartConfiguration, ChartTypeRegistry } from 'chart.js/auto';
 import { KeywordCloudData, ChartType } from './types';
 import { SynapticRouteSettings } from './settings';
 import { ObsidianUtils } from './obsidianUtils';
+import { KeywordCloud } from './keywordCloud';
 
 export class KeywordChart {
     private settings: SynapticRouteSettings;
@@ -23,11 +24,7 @@ export class KeywordChart {
         const html = `<div class="synaptic-route-container chart" style="width: 100%; height: 0; padding-bottom: 50%;"><canvas id="${canvasId}"></canvas></div>`;
         let labels: string[] = [];
         
-        if(this.settings.keywordSelectionMethod === 'tags'){
-            labels = arrKeywordCloudData.map(t => `#${t.displayName}`);
-        } else {
-            labels = arrKeywordCloudData.map(t => `#${t.displayName.slice(2)}`);
-        }
+        labels = arrKeywordCloudData.map(t => `#${this.getInnerContentFromKeywordDisplayName(t.displayName)}`);
 
         const vaultName = this.obsidianUtils.getVaultName();
         const links = arrKeywordCloudData.map(t => `obsidian://open?vault=${encodeURIComponent(vaultName)}&file=${encodeURIComponent(t.displayName)}`);
@@ -73,15 +70,21 @@ export class KeywordChart {
             const createOrUpdateChart = () => {
                 updateCanvasSize();
 
+                const useProposedColors = document.body.classList.contains('word-cloud-use-proposed-colors');
                 const currentColor = isCurrentThemeDark() ? '#E0E0E0' : '#333';
                 const gridDefaultColor = isCurrentThemeDark() ? '#555' : '#CCC';
-                const themeColor = this.options.theme === 'dark' ? '#E0E0E0' : 
-                                   this.options.theme === 'light' ? '#333' : 
-                                   currentColor;
 
-                const gridColor = this.options.theme === 'dark' ? '#555' : 
-                                   this.options.theme === 'light' ? '#CCC' : 
-                                   gridDefaultColor;
+                const themeColor = useProposedColors ? (
+                    this.options.theme === 'dark' ? '#E0E0E0' : 
+                    this.options.theme === 'light' ? '#333' : 
+                    currentColor
+                ) : currentColor;
+
+                const gridColor = useProposedColors ? (
+                    this.options.theme === 'dark' ? '#555' : 
+                    this.options.theme === 'light' ? '#CCC' : 
+                    gridDefaultColor
+                ) : gridDefaultColor;
 
                 const chartConfig: ChartConfiguration = {
                     type: chartType as keyof ChartTypeRegistry,
@@ -216,5 +219,21 @@ export class KeywordChart {
             createOrUpdateChart();
         }
     }
-}
 
+    private getInnerContentFromKeywordDisplayName(keywordDisplayName: string): string {
+        const keywordType = this.settings.keywordSelectionMethod;
+        let innerContent = ' ';
+        if(keywordType === 'tags'){
+            innerContent = keywordDisplayName;
+        }else if(keywordType === 'fileNamePrefix'){
+            const prefix = this.settings.keywordSelectionInput;
+            innerContent = keywordDisplayName.slice(prefix.length);
+        }else if(keywordType === 'fileNameSuffix'){
+            const suffix = this.settings.keywordSelectionInput;
+            innerContent = keywordDisplayName.slice(0, -suffix.length);
+        }else if(keywordType === 'fileNameRegex'){
+            innerContent = keywordDisplayName;
+        }
+        return innerContent;
+    }
+}

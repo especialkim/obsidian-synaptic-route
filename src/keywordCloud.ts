@@ -64,7 +64,6 @@ export class KeywordCloud {
             // 필터 옵션을 적용하여 경로 배열을 필터링
             arrPathOfOneDepthFromCurrentPath = this.executeFilterOption(arrPathOfOneDepthFromCurrentPath);
             arrPathOfOneDepthFromCurrentPath.push(this.ctx.sourcePath);
-
             // 매칭된 키워드 객체 배열을 생성하고 키워드가 있는 항목만 필터링
             const arrObjMatchedKeyword = this.getArrObjMatchedKeywordFromArrPath(arrPathOfOneDepthFromCurrentPath)
                 .filter(t => t.hasKeywords)
@@ -85,9 +84,7 @@ export class KeywordCloud {
             // 렌더링된 HTML을 요소에 삽입
             this.el.innerHTML = renderedHTML;
 
-            if(this.options.type === 'wordcloud' || this.options.type === 'chart'){
-                this.addButtons();
-            }
+            this.addButtons();
 
         } catch (error) {
             console.error("Error rendering keyword cloud:", error);
@@ -169,19 +166,38 @@ export class KeywordCloud {
         const displayType = this.options.type.toLowerCase();
 
         if(keywordType === 'tags'){
-            keywordSpans = shuffledData.map(item => 
-                `<span class="cloud ${item.cloudFactor}"><a href="#${item.displayName}" class="tag" target="_blank" rel="noopener nofollow">#${item.displayName}</a></span>`
-            ).join('');
+            keywordSpans = shuffledData.map(item => {
+                const innerContent = this.getInnerContentFromKeywordDisplayName(item.displayName);
+                return `<span class="cloud ${item.cloudFactor}"><a href="#${item.displayName}" class="tag" target="_blank" rel="noopener nofollow">#${item.displayName}</a></span>`
+            }).join('');
         }else{
-            keywordSpans = shuffledData.map(item => 
-                `<span class="cloud ${item.cloudFactor}"><a data-tooltip-position="top" aria-label="${item.fileName}" data-href="${item.fileName}" href="${item.fileName}" class="internal-link" target="_blank" rel="noopener nofollow">#${item.displayName.slice(2)}</a></span>`
-            ).join('');
+            keywordSpans = shuffledData.map(item => {
+                const innerContent = this.getInnerContentFromKeywordDisplayName(item.displayName);
+                return `<span class="cloud ${item.cloudFactor}"><a data-tooltip-position="top" aria-label="${item.fileName}" data-href="${item.fileName}" href="${item.fileName}" class="internal-link" target="_blank" rel="noopener nofollow">#${innerContent}</a></span>`
+            }).join('');
         }
 
         // Remove theme from here and only use displayType
         const html = `<div class="synaptic-route-container ${displayType}"><div class="synaptic-route-row"><div class="synaptic-route-keyword-cloud">${keywordSpans}</div></div></div>`;
 
         return html;
+    }
+
+    private getInnerContentFromKeywordDisplayName(keywordDisplayName: string): string {
+        const keywordType = this.settings.keywordSelectionMethod;
+        let innerContent = ' ';
+        if(keywordType === 'tags'){
+            innerContent = keywordDisplayName.slice(1);
+        }else if(keywordType === 'fileNamePrefix'){
+            const prefix = this.settings.keywordSelectionInput;
+            innerContent = keywordDisplayName.slice(prefix.length);
+        }else if(keywordType === 'fileNameSuffix'){
+            const suffix = this.settings.keywordSelectionInput;
+            innerContent = keywordDisplayName.slice(0, -suffix.length);
+        }else if(keywordType === 'fileNameRegex'){
+            innerContent = keywordDisplayName;
+        }
+        return innerContent;
     }
 
     getArrObjMatchedKeywordFromArrPath(arrPath: string[]): MatchedKeyword[] {
@@ -202,7 +218,6 @@ export class KeywordCloud {
         if (keywordsType === 'tags') {
             keywords = this.obsidianUtils.getArrTagFromPath(path);
         }else{
-            
             keywords = this.obsidianUtils.getArrPathOfOutlinkFromPath(path)
                 .filter(p => this.isKeyword(p));
             switch(keywordsType){
@@ -236,7 +251,23 @@ export class KeywordCloud {
 
     isLiteratureNote(path: string): boolean {
         const queryType = this.settings.literatureNoteSelectionMethod;
-        if(queryType === 'folderPath'){
+        if(queryType === 'tags'){
+            const tags = this.obsidianUtils.getArrTagFromPath(path);
+            const tag = this.settings.literatureNoteSelectionInput;
+            return tags.includes(tag);
+        }else if(queryType === 'fileNamePrefix'){
+            const fileName = this.obsidianUtils.getFileNameFromPath(path);
+            return fileName.startsWith(this.settings.literatureNoteSelectionInput);
+        }else if(queryType === 'fileNameSuffix'){
+            const fileName = this.obsidianUtils.getFileNameFromPath(path);
+            const input = this.settings.literatureNoteSelectionInput;
+            console.log(fileName.endsWith(input) || fileName.replace('.md', '').endsWith(input));
+            return fileName.endsWith(input) || fileName.replace('.md', '').endsWith(input);
+        }else if(queryType === 'fileNameRegex'){
+            const fileName = this.obsidianUtils.getFileNameFromPath(path);
+            const regex = new RegExp(this.settings.literatureNoteSelectionInput);
+            return regex.test(fileName);
+        }else if(queryType === 'folderPath'){
             return path.includes(this.settings.literatureNoteSelectionInput);
         }
         return false;
@@ -251,9 +282,26 @@ export class KeywordCloud {
     isMainCard(path: string): boolean {
         const queryType = this.settings.permanentNoteSelectionMethod;
 
-        if(queryType === 'folderPath'){
+        if(queryType === 'tags'){
+            const tags = this.obsidianUtils.getArrTagFromPath(path);
+            const tag = this.settings.permanentNoteSelectionInput;
+            return tags.includes(tag);
+        }else if(queryType === 'fileNamePrefix'){
+            const fileName = this.obsidianUtils.getFileNameFromPath(path);
+            return fileName.startsWith(this.settings.permanentNoteSelectionInput);
+        }else if(queryType === 'fileNameSuffix'){
+            const fileName = this.obsidianUtils.getFileNameFromPath(path);
+            const input = this.settings.permanentNoteSelectionInput;
+            console.log(fileName.endsWith(input) || fileName.replace('.md', '').endsWith(input));
+            return fileName.endsWith(input) || fileName.replace('.md', '').endsWith(input);
+        }else if(queryType === 'fileNameRegex'){
+            const fileName = this.obsidianUtils.getFileNameFromPath(path);
+            const regex = new RegExp(this.settings.permanentNoteSelectionInput);
+            return regex.test(fileName);
+        }else if(queryType === 'folderPath'){
             return path.includes(this.settings.permanentNoteSelectionInput);
         }
+
         return false;
     }
 

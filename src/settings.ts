@@ -2,7 +2,7 @@ import { App, PluginSettingTab, Setting } from 'obsidian';
 import MyPlugin from '../main';
 
 export interface SynapticRouteSettings {
-    keywordSelectionMethod: 'tags' | 'fileNamePrefix' | 'fileNameSuffix' | 'fileNameRegex' | 'none';
+    keywordSelectionMethod: 'tags' | 'fileNamePrefix' | 'fileNameSuffix' | 'fileNameRegex' ;
     keywordSelectionInput: string;
     keywordBacklinkType: 'allNotes' | 'permanentNotesOnly';
     permanentNoteSelectionMethod: 'tags' | 'fileNamePrefix' | 'fileNameSuffix' | 'fileNameRegex' | 'folderPath';
@@ -16,7 +16,7 @@ export interface SynapticRouteSettings {
 }
 
 export const DEFAULT_SETTINGS: SynapticRouteSettings = {
-    keywordSelectionMethod: 'none',
+    keywordSelectionMethod: 'tags',
     keywordSelectionInput: '',
     keywordBacklinkType: 'permanentNotesOnly',
     permanentNoteSelectionMethod: 'folderPath',
@@ -53,8 +53,7 @@ export class SynapticRouteSettingTab extends PluginSettingTab {
                     'tags': '태그',
                     'fileNamePrefix': '파일명 접두사',
                     'fileNameSuffix': '파일명 접미사',
-                    'regex': '파일명 정규 표현식',
-                    'none': '없음'
+                    'fileNameRegex': '파일명 정규 표현식'
                 })
                 .setValue(this.plugin.settings.keywordSelectionMethod)
                 .onChange(async (value) => {
@@ -64,18 +63,16 @@ export class SynapticRouteSettingTab extends PluginSettingTab {
                 }));
 
         // Keyword Selection Input (conditional)
-        if (this.plugin.settings.keywordSelectionMethod !== 'none') {
-            new Setting(containerEl)
-                .setName('키워드 선별 입력')
-                .setDesc('선택한 방식에 따른 키워드 선별 기준을 입력하세요.')
-                .addText(text => text
-                    .setPlaceholder('예: #keyword 또는 ^KW-')
-                    .setValue(this.plugin.settings.keywordSelectionInput)
-                    .onChange(async (value) => {
-                        this.plugin.settings.keywordSelectionInput = value;
-                        await this.plugin.saveSettings();
-                    }));
-        }
+        new Setting(containerEl)
+            .setName('키워드 선별 입력')
+            .setDesc('선택한 방식에 따른 키워드 선별 기준을 입력하세요.')
+            .addText(text => text
+                .setPlaceholder('예: #keyword 또는 ^KW-')
+                .setValue(this.plugin.settings.keywordSelectionInput)
+                .onChange(async (value) => {
+                    this.plugin.settings.keywordSelectionInput = value;
+                    await this.plugin.saveSettings();
+            }));
 
         // Keyword Backlink Type
         new Setting(containerEl)

@@ -18,9 +18,10 @@ export class KeywordTable {
         `).join('');
 
         return `
-            <table class="synaptic-route-table">
-                <thead>
-                    <tr>
+            <div class="synaptic-route-container">
+                <table class="synaptic-route-table">
+                    <thead>
+                        <tr>
                         <th>Rank</th>
                         <th>Keyword</th>
                         <th>Score</th>
@@ -30,7 +31,8 @@ export class KeywordTable {
                 <tbody>
                     ${tableRows}
                 </tbody>
-            </table>
+                </table>
+            </div>
         `;
     }
 
