@@ -41,19 +41,19 @@ export class SynapticRouteSettingTab extends PluginSettingTab {
         const { containerEl } = this;
 
         containerEl.empty();
-        containerEl.createEl('h1', {text: '관련 키워드 시각화'});
-        containerEl.createEl('h2', {text: '키워드 선별 방식'});
+        containerEl.createEl('h1', {text: 'Keyword Visualization'});
+        containerEl.createEl('h2', {text: 'Keyword Selection Method'});
 
         // Keyword Selection Method
         new Setting(containerEl)
-            .setName('키워드 선별 방식')
-            .setDesc('노트 내에서 키워드를 식별하는 방법을 정의합니다.')
+            .setName('Keyword Selection Method')
+            .setDesc('Define how to identify keywords in notes.')
             .addDropdown(dropdown => dropdown
                 .addOptions({
-                    'tags': '태그',
-                    'fileNamePrefix': '파일명 접두사',
-                    'fileNameSuffix': '파일명 접미사',
-                    'fileNameRegex': '파일명 정규 표현식'
+                    'tags': 'Tags',
+                    'fileNamePrefix': 'Filename Prefix',
+                    'fileNameSuffix': 'Filename Suffix',
+                    'fileNameRegex': 'Filename Regex'
                 })
                 .setValue(this.plugin.settings.keywordSelectionMethod)
                 .onChange(async (value) => {
@@ -62,26 +62,26 @@ export class SynapticRouteSettingTab extends PluginSettingTab {
                     this.display();
                 }));
 
-        // Keyword Selection Input (conditional)
+        // Keyword Selection Input
         new Setting(containerEl)
-            .setName('키워드 선별 입력')
-            .setDesc('선택한 방식에 따른 키워드 선별 기준을 입력하세요.')
+            .setName('Keyword Selection Input')
+            .setDesc('Enter the criteria for keyword selection based on the selected method.')
             .addText(text => text
-                .setPlaceholder('예: #keyword 또는 ^KW-')
+                .setPlaceholder('e.g., #keyword or ^KW-')
                 .setValue(this.plugin.settings.keywordSelectionInput)
                 .onChange(async (value) => {
                     this.plugin.settings.keywordSelectionInput = value;
                     await this.plugin.saveSettings();
-            }));
+                }));
 
         // Keyword Backlink Type
         new Setting(containerEl)
-            .setName('키워드 백링크 유형')
-            .setDesc('키워드 백링크로 고려할 노트 유형을 지정합니다.')
+            .setName('Keyword Backlink Type')
+            .setDesc('Specify which type of notes to consider for keyword backlinks.')
             .addDropdown(dropdown => dropdown
                 .addOptions({
-                    'allNotes': '모든 노트',
-                    'permanentNotesOnly': '영구 노트만'
+                    'allNotes': 'All Notes',
+                    'permanentNotesOnly': 'Permanent Notes Only'
                 })
                 .setValue(this.plugin.settings.keywordBacklinkType)
                 .onChange(async (value) => {
@@ -93,15 +93,15 @@ export class SynapticRouteSettingTab extends PluginSettingTab {
         // Permanent Note Selection Method (conditional)
         if (this.plugin.settings.keywordBacklinkType === 'permanentNotesOnly') {
             new Setting(containerEl)
-                .setName('영구 노트 선별 방식')
-                .setDesc('영구 노트를 식별하는 방법을 정의합니다.')
+                .setName('Permanent Note Selection Method')
+                .setDesc('Define how to identify permanent notes.')
                 .addDropdown(dropdown => dropdown
                     .addOptions({
-                        'tags': '태그',
-                        'fileNamePrefix': '파일명 접두사',
-                        'fileNameSuffix': '파일명 접미사',
-                        'regex': '파일명 정규 표현식',
-                        'folderPath': '폴더 경로'
+                        'tags': 'Tags',
+                        'fileNamePrefix': 'Filename Prefix',
+                        'fileNameSuffix': 'Filename Suffix',
+                        'regex': 'Filename Regex',
+                        'folderPath': 'Folder Path'
                     })
                     .setValue(this.plugin.settings.permanentNoteSelectionMethod)
                     .onChange(async (value) => {
@@ -111,10 +111,10 @@ export class SynapticRouteSettingTab extends PluginSettingTab {
                     }));
 
             new Setting(containerEl)
-                .setName('영구 노트 선별 입력')
-                .setDesc('선택한 방식에 따른 영구 노트 선별 기준을 입력하세요.')
+                .setName('Permanent Note Selection Input')
+                .setDesc('Enter the criteria for permanent note selection based on the selected method.')
                 .addText(text => text
-                    .setPlaceholder('예: #permanent 또는 Permanent/')
+                    .setPlaceholder('e.g., #permanent or Permanent/')
                     .setValue(this.plugin.settings.permanentNoteSelectionInput)
                     .onChange(async (value) => {
                         this.plugin.settings.permanentNoteSelectionInput = value;
@@ -122,12 +122,12 @@ export class SynapticRouteSettingTab extends PluginSettingTab {
                     }));
         }
 
-        // Lucy Zettelkasten 옵션
-        containerEl.createEl('h2', {text: 'Lucy Zettelkasten 옵션'});
+        // Lucy Zettelkasten Options
+        containerEl.createEl('h2', {text: 'Lucy Zettelkasten Options'});
 
         new Setting(containerEl)
-            .setName('Lucy Zettelkasten 활성화')
-            .setDesc('Lucy Zettelkasten 워크플로우를 따르는 사용자를 위한 특별 옵션입니다.')
+            .setName('Enable Lucy Zettelkasten')
+            .setDesc('Special options for users following the Lucy Zettelkasten workflow.')
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.lucyZettelkastenEnabled)
                 .onChange(async (value) => {
@@ -138,15 +138,15 @@ export class SynapticRouteSettingTab extends PluginSettingTab {
 
         if (this.plugin.settings.lucyZettelkastenEnabled) {
             new Setting(containerEl)
-                .setName('문헌 노트 선별 방식')
-                .setDesc('문헌 노트를 식별하는 방법을 정의합니다.')
+                .setName('Literature Note Selection Method')
+                .setDesc('Define how to identify literature notes.')
                 .addDropdown(dropdown => dropdown
                     .addOptions({
-                        'tags': '태그',
-                        'fileNamePrefix': '파일명 접두사',
-                        'fileNameSuffix': '파일명 접미사',
-                        'regex': '파일명 정규 표현식',
-                        'folderPath': '폴더 경로'
+                        'tags': 'Tags',
+                        'fileNamePrefix': 'Filename Prefix',
+                        'fileNameSuffix': 'Filename Suffix',
+                        'regex': 'Filename Regex',
+                        'folderPath': 'Folder Path'
                     })
                     .setValue(this.plugin.settings.literatureNoteSelectionMethod)
                     .onChange(async (value) => {
@@ -156,10 +156,10 @@ export class SynapticRouteSettingTab extends PluginSettingTab {
                     }));
 
             new Setting(containerEl)
-                .setName('문헌 노트 선별 입력')
-                .setDesc('선택한 방식에 따른 문헌 노트 선별 기준을 입력하세요.')
+                .setName('Literature Note Selection Input')
+                .setDesc('Enter the criteria for literature note selection based on the selected method.')
                 .addText(text => text
-                    .setPlaceholder('예: Literature/ 또는 #literature')
+                    .setPlaceholder('e.g., Literature/ or #literature')
                     .setValue(this.plugin.settings.literatureNoteSelectionInput)
                     .onChange(async (value) => {
                         this.plugin.settings.literatureNoteSelectionInput = value;
@@ -167,14 +167,14 @@ export class SynapticRouteSettingTab extends PluginSettingTab {
                     }));
         }
 
-        // 필터링 옵션
-        containerEl.createEl('h2', {text: '필터링 옵션'});
+        // Filtering Options
+        containerEl.createEl('h2', {text: 'Filtering Options'});
 
         new Setting(containerEl)
-            .setName('제외할 폴더')
-            .setDesc('제외할 폴더 경로를 한 줄에 하나씩 입력합니다. 정규 표현식 지원.')
+            .setName('Exclude Folders')
+            .setDesc('Enter folder paths to exclude, one per line. Supports regex.')
             .addTextArea(text => text
-                .setPlaceholder('예:\nDaily/\n^Archive/')
+                .setPlaceholder('e.g.:\nDaily/\n^Archive/')
                 .setValue(this.plugin.settings.excludeFolders.join('\n'))
                 .onChange(async (value) => {
                     this.plugin.settings.excludeFolders = value.split('\n').filter(item => item.trim() !== '');
@@ -182,10 +182,10 @@ export class SynapticRouteSettingTab extends PluginSettingTab {
                 }));
 
         new Setting(containerEl)
-            .setName('제외할 태그')
-            .setDesc('제외할 태그를 한 줄에 하나씩 입력합니다. 정규 표현식 지원.')
+            .setName('Exclude Tags')
+            .setDesc('Enter tags to exclude, one per line. Supports regex.')
             .addTextArea(text => text
-                .setPlaceholder('예:\n#private\n#temp.*')
+                .setPlaceholder('e.g.:\n#private\n#temp.*')
                 .setValue(this.plugin.settings.excludeTags.join('\n'))
                 .onChange(async (value) => {
                     this.plugin.settings.excludeTags = value.split('\n').filter(item => item.trim() !== '');
@@ -193,10 +193,10 @@ export class SynapticRouteSettingTab extends PluginSettingTab {
                 }));
 
         new Setting(containerEl)
-            .setName('파일명 파일')
-            .setDesc('제외할 파일명 패턴을 한 줄에 하나씩 입력합니다. 정규 표현식 지원.')
+            .setName('Exclude Filename Patterns')
+            .setDesc('Enter filename patterns to exclude, one per line. Supports regex.')
             .addTextArea(text => text
-                .setPlaceholder('예:\n^_.*\n.*\.tmp$')
+                .setPlaceholder('e.g.:\n^_.*\n.*\.tmp$')
                 .setValue(this.plugin.settings.excludeFileNamePatterns.join('\n'))
                 .onChange(async (value) => {
                     this.plugin.settings.excludeFileNamePatterns = value.split('\n').filter(item => item.trim() !== '');
