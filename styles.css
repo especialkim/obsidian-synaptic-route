@@ -1,8 +1,171 @@
-/*
+/* @settings
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
-
-If your plugin does not need CSS, delete this file.
-
+name: ⚡ Synaptic Route
+id: synaptic-route
+settings:
+    - 
+        id: word-cloud-use-proposed-colors
+        title: Use Colors Defined in This Snippet
+        description: When ON, use colors defined in this CSS snippet. When OFF, use theme's color settings.
+        type: class-toggle
+    
 */
+
+  /* Synaptic Route */
+  @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard-dynamic-subset.css");
+
+  .theme-dark .block-language-synapticroute.light,
+  .block-language-synapticroute.light,
+  .block-language-synapticroute.default{
+    --word-cloud-background-color: white;
+    --word-cloud-color1: 214, 36, 0;
+    --word-cloud-color2: 148, 99, 0;
+    --word-cloud-color3: 61, 122, 0;
+    --word-cloud-color4: 0, 122, 122;
+    --word-cloud-color5: 15, 95, 255;
+    --word-cloud-color6: 113, 66, 255;
+    --word-cloud-color7: 176, 0, 235;
+    --word-cloud-color8: 209, 0, 129;
+
+    --word-cloud-link-background-color: #dcc89687;
+  }
+
+  .block-language-synapticroute.dark,
+  .theme-dark .block-language-synapticroute.default{
+    --word-cloud-background-color: rgba(0, 0, 0, 0.3);
+    --word-cloud-color1: 238, 137, 104;
+    --word-cloud-color2: 202, 202, 22;
+    --word-cloud-color3: 63, 188, 21;
+    --word-cloud-color4: 21, 188, 105;
+    --word-cloud-color5: 25, 179, 230;
+    --word-cloud-color6: 154, 154, 244;
+    --word-cloud-color7: 214, 131, 241;
+    --word-cloud-color8: 241, 126, 184;
+
+    --word-cloud-link-background-color: #4e4736c4;
+  }
+
+  .block-language-synapticroute.cloud1{ --size : 1;}
+  .block-language-synapticroute .cloud2{ --size : 2;}
+  .block-language-synapticroute .cloud3{ --size : 3;}
+  .block-language-synapticroute .cloud4{ --size : 4;}
+  .block-language-synapticroute .cloud5{ --size : 5;}
+  .block-language-synapticroute .cloud6{ --size : 6;}
+  .block-language-synapticroute .cloud7{ --size : 7;}
+
+  .block-language-synapticroute{
+    font-family: "Pretendard Variable", Pretendard;
+    line-height: 2.5rem;
+  }
+
+  .synaptic-route-container{
+    --wordcloud-background-color: var(--background-primary-alt);
+
+    --wordcloud-color1: var(--color-red-rgb);
+    --wordcloud-color2: var(--color-orange-rgb);
+    --wordcloud-color3: var(--color-yellow-rgb);
+    --wordcloud-color4: var(--color-green-rgb);
+    --wordcloud-color5: var(--color-cyan-rgb);
+    --wordcloud-color6: var(--color-blue-rgb);
+    --wordcloud-color7: var(--color-purple-rgb);
+    --wordcloud-color8: var(--color-pink-rgb);
+    --wordcloud-color-opacity: 0.77;
+  
+    --wordcloud-max-width: 600px;
+    --wordcloud-padding: 2rem 20px;
+    --wordcloud-line-height: 2.5rem;
+  }
+
+  .word-cloud-use-proposed-colors .synaptic-route-container{
+    --wordcloud-background-color: var(--word-cloud-background-color, var(--background-primary-alt));
+    --wordcloud-color1: var(--word-cloud-color1, var(--color-red-rgb));
+    --wordcloud-color2: var(--word-cloud-color2, var(--color-orange-rgb));
+    --wordcloud-color3: var(--word-cloud-color3, var(--color-yellow-rgb));
+    --wordcloud-color4: var(--word-cloud-color4, var(--color-green-rgb));
+    --wordcloud-color5: var(--word-cloud-color5, var(--color-cyan-rgb));
+    --wordcloud-color6: var(--word-cloud-color6, var(--color-blue-rgb));
+    --wordcloud-color7: var(--word-cloud-color7, var(--color-purple-rgb));
+    --wordcloud-color8: var(--word-cloud-color8, var(--color-pink-rgb));
+  }
+
+  .synaptic-route-container{
+    background-color: var(--wordcloud-background-color);
+    line-height: var(--wordcloud-line-height);
+  }
+
+  .synaptic-route-row{
+    max-width: var(--wordcloud-max-width);
+    margin: auto;
+    padding: var(--wordcloud-padding);
+    text-align: center;
+  }
+
+.cloud:nth-child(4n+1) a { color: rgba(var(--wordcloud-color1), var(--wordcloud-color-opacity)) !important}
+.cloud:nth-child(4n+2) a { color: rgba(var(--wordcloud-color2), var(--wordcloud-color-opacity)) !important}
+.cloud:nth-child(4n+3) a { color: rgba(var(--wordcloud-color3), var(--wordcloud-color-opacity)) !important}
+.cloud:nth-child(4n+4) a { color: rgba(var(--wordcloud-color4), var(--wordcloud-color-opacity)) !important}
+.cloud:nth-child(11n-2) a { color: rgba(var(--wordcloud-color5), var(--wordcloud-color-opacity)) !important}
+.cloud:nth-child(3n+1) a { color: rgba(var(--wordcloud-color6), var(--wordcloud-color-opacity)) !important}
+.cloud:nth-child(5n+2) a { color: rgba(var(--wordcloud-color7), var(--wordcloud-color-opacity)) !important}
+.cloud:nth-child(7n) a { color: rgba(var(--wordcloud-color8), var(--wordcloud-color-opacity)) !important}
+
+.synaptic-route-container a{
+  padding: 0;
+  padding: 3px 3px;
+  margin: 0.2em 0.2em;
+  font-weight: bold;
+  background-color:transparent;
+  font-size: calc(var(--size) * 0.4rem + 1rem);
+  text-wrap: nowrap;
+  line-height: 1.1;
+}
+
+.synaptic-route-table  a.tag{
+  color: var(--tag-color) !important;
+}
+
+.synaptic-route-keyword-cloud a.tag{
+  border-radius: 0;
+}
+
+.synaptic-route-container a:hover{
+  --wordcloud-color-opacity: 1;
+  text-decoration: underline;
+  box-shadow: inset 0 -100px 0 var(--word-cloud-link-background-color);
+}
+
+.synaptic-route-keyword-cloud{
+  --link-unresolved-opacity: 1;
+}
+
+table.synaptic-route-table{
+  width: 100%;
+  margin-block-start: 0;
+  margin-block-end: 0;
+}
+
+.word-cloud-use-proposed-colors .markdown-rendered table.synaptic-route-table{
+  background-color: var(--background-primary);
+}
+
+table.synaptic-route-table td{
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+table.synaptic-route-table td,
+table.synaptic-route-table th{
+  vertical-align: middle;
+}
+
+
+
+
+
+
+
+
+
+
+
+
