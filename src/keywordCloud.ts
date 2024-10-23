@@ -47,7 +47,8 @@ export class KeywordCloud {
 
     process() {
         try {
-
+            this.el.empty();
+ 
             // 현재 경로에서 한 단계 깊이의 경로를 저장할 배열
             let arrPathOfOneDepthFromCurrentPath: string[] = [];
             
@@ -93,6 +94,7 @@ export class KeywordCloud {
             this.el.className = this.el.className.toLowerCase();
             // 렌더링된 HTML을 요소에 삽입
             this.el.innerHTML = renderedHTML;
+            this.addRefreshButton();
 
         } catch (error) {
             console.error("Error rendering keyword cloud:", error);
@@ -105,6 +107,17 @@ export class KeywordCloud {
     }
 
     /* Sub Functions*/
+
+    private addRefreshButton() {
+        const refreshButton = this.el.createEl('button', {
+            text: '🔄',
+            cls: 'synaptic-route-refresh-button',
+        });
+        refreshButton.addEventListener('click', () => {
+            this.process();
+        });
+        this.el.appendChild(refreshButton); // 이 줄을 추가합니다.
+    }
 
     render(arrKeywordCloudData: KeywordCloudData[]): string {
 
@@ -615,6 +628,10 @@ export class KeywordCloud {
         });
     }
 }
+
+
+
+
 
 
 
