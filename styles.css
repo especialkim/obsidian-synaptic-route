@@ -145,6 +145,10 @@ settings:
 
 .synaptic-route-keyword-cloud{
   --link-unresolved-opacity: 1;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-end;
 }
 
 table.synaptic-route-table{
@@ -157,15 +161,20 @@ table.synaptic-route-table{
   background-color: var(--background-primary);
 }
 
-table.synaptic-route-table td{
-  padding-top: 5px;
-  padding-bottom: 5px;
+table.synaptic-route-table th{
+  color: var(--bold-color);
+  font-weight: calc(var(--font-weight) + var(--bold-modifier));
 }
 
 table.synaptic-route-table td,
 table.synaptic-route-table th{
   vertical-align: middle;
   text-align: center;
+}
+
+table.synaptic-route-table td{
+  padding-top: 5px;
+  padding-bottom: 5px;
 }
 
 .synaptic-route-button-container{
@@ -175,6 +184,10 @@ table.synaptic-route-table th{
   top: 10px;
   padding: 10px 0px;
   gap: 5px
+}
+
+.block-language-synapticroute:has(table) .synaptic-route-button-container{
+  flex-direction: column;
 }
 
 .synaptic-route-button {
