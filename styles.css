@@ -45,6 +45,10 @@ settings:
     --word-cloud-link-background-color: #4e4736c4;
   }
 
+  body:not(.theme-dark) .block-language-synapticroute.dark{
+    --word-cloud-background-color: rgba(0, 0, 0, 0.9);
+  }
+
   .block-language-synapticroute.cloud1{ --size : 1;}
   .block-language-synapticroute .cloud2{ --size : 2;}
   .block-language-synapticroute .cloud3{ --size : 3;}
@@ -101,14 +105,14 @@ settings:
     text-align: center;
   }
 
-.cloud:nth-child(4n+1) a { color: rgba(var(--wordcloud-color1), var(--wordcloud-color-opacity)) !important}
-.cloud:nth-child(4n+2) a { color: rgba(var(--wordcloud-color2), var(--wordcloud-color-opacity)) !important}
-.cloud:nth-child(4n+3) a { color: rgba(var(--wordcloud-color3), var(--wordcloud-color-opacity)) !important}
-.cloud:nth-child(4n+4) a { color: rgba(var(--wordcloud-color4), var(--wordcloud-color-opacity)) !important}
-.cloud:nth-child(11n-2) a { color: rgba(var(--wordcloud-color5), var(--wordcloud-color-opacity)) !important}
-.cloud:nth-child(3n+1) a { color: rgba(var(--wordcloud-color6), var(--wordcloud-color-opacity)) !important}
-.cloud:nth-child(5n+2) a { color: rgba(var(--wordcloud-color7), var(--wordcloud-color-opacity)) !important}
-.cloud:nth-child(7n) a { color: rgba(var(--wordcloud-color8), var(--wordcloud-color-opacity)) !important}
+.cloud:nth-child(4n+1) a, .cloud:nth-child(4n+1) a.internal-link.is-unresolved { color: rgba(var(--wordcloud-color1), var(--wordcloud-color-opacity)) !important}
+.cloud:nth-child(4n+2) a, .cloud:nth-child(4n+2) a.internal-link.is-unresolved { color: rgba(var(--wordcloud-color2), var(--wordcloud-color-opacity)) !important}
+.cloud:nth-child(4n+3) a, .cloud:nth-child(4n+3) a.internal-link.is-unresolved { color: rgba(var(--wordcloud-color3), var(--wordcloud-color-opacity)) !important}
+.cloud:nth-child(4n+4) a, .cloud:nth-child(4n+4) a.internal-link.is-unresolved { color: rgba(var(--wordcloud-color4), var(--wordcloud-color-opacity)) !important}
+.cloud:nth-child(11n-2) a, .cloud:nth-child(11n-2) a.internal-link.is-unresolved { color: rgba(var(--wordcloud-color5), var(--wordcloud-color-opacity)) !important}
+.cloud:nth-child(3n+1) a, .cloud:nth-child(3n+1) a.internal-link.is-unresolved { color: rgba(var(--wordcloud-color6), var(--wordcloud-color-opacity)) !important}
+.cloud:nth-child(5n+2) a, .cloud:nth-child(5n+2) a.internal-link.is-unresolved { color: rgba(var(--wordcloud-color7), var(--wordcloud-color-opacity)) !important}
+.cloud:nth-child(7n) a, .cloud:nth-child(7n) a.internal-link.is-unresolved { color: rgba(var(--wordcloud-color8), var(--wordcloud-color-opacity)) !important}
 
 .synaptic-route-container a{
   padding: 0;
@@ -128,10 +132,14 @@ settings:
 .synaptic-route-keyword-cloud a.tag{
   border-radius: 0;
 }
+.synaptic-route-keyword-cloud a {
+  text-decoration-line: none !important;
+  text-decoration-color: inherit !important;
+}
 
 .synaptic-route-container a:hover{
   --wordcloud-color-opacity: 1;
-  text-decoration: underline;
+  text-decoration-line: underline !important;
   box-shadow: inset 0 -100px 0 var(--word-cloud-link-background-color);
 }
 
@@ -157,30 +165,24 @@ table.synaptic-route-table td{
 table.synaptic-route-table td,
 table.synaptic-route-table th{
   vertical-align: middle;
+  text-align: center;
 }
 
-.block-language-synapticroute .synaptic-route-refresh-button {
+.synaptic-route-button-container{
+  display: flex;
   position: absolute;
-  top: 10px;
   right: 10px;
-  background-color: transparent;
+  top: 10px;
+  padding: 10px 0px;
+  gap: 5px
+}
+
+.synaptic-route-button {
+  background-color: transparent !important;
   cursor: pointer;
   opacity: 0.7;
 }
 
-.block-language-synapticroute .synaptic-route-refresh-button:hover{
+.synaptic-route-button:hover{
   opacity: 1;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

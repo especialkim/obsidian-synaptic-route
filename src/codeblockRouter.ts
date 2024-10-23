@@ -1,17 +1,14 @@
 import { MarkdownPostProcessorContext } from 'obsidian';
 import { SyntaxValidator } from './syntaxValidator';
-import { SynapticRouteOptions, SyntaxError } from './types';
+import { SyntaxError } from './types';
 import { KeywordCloud } from './keywordCloud';
 import { SynapticRouteSettings } from './settings';
 
 
 export class CodeblockRouter {
-    settings: SynapticRouteSettings;
-    private processors: { [key: string]: (source: string, el: HTMLElement, ctx: MarkdownPostProcessorContext) => void } = {};
+    private processors: Record<string, (source: string, el: HTMLElement, ctx: MarkdownPostProcessorContext) => void> = {};
 
-    constructor(settings: SynapticRouteSettings) {
-        // 기본 프로세서 등록
-        this.settings = settings;
+    constructor(private settings: SynapticRouteSettings) {
         this.registerProcessor('SynapticRoute', this.synapticRouteProcessor.bind(this));
     }
 
@@ -28,58 +25,45 @@ export class CodeblockRouter {
     }
 
     private synapticRouteProcessor(source: string, el: HTMLElement, ctx: MarkdownPostProcessorContext) {
-        const lines = source.split('\n').map(line => line.trim()).filter(line => line);
-        const rawOptions: Record<string, string> = {};
-
-        lines.forEach(line => {
-            const [key, value] = line.split(':').map(part => part.trim());
-            if (key && value) {
-                rawOptions[key.toLowerCase()] = value;
-            }
-        });
-
-        let options: SynapticRouteOptions;
+        const rawOptions = this.parseOptions(source);
 
         try {
-            options = SyntaxValidator.validate(rawOptions);
+            const options = SyntaxValidator.validate(rawOptions);
+            new KeywordCloud(el, ctx, this.settings, options).process();
         } catch (errors) {
-            console.error("Syntax validation errors:", errors);
-            
-            const errorDiv = el.createEl('div');
-
-            errorDiv.createEl('h5', { 
-                text: 'Syntax Errors:',
-                attr: { class: 'error-header' } 
-            });
-
-            (errors as SyntaxError[]).forEach(error => {
-                const errorLine = errorDiv.createEl('div');
-                const errorInputDiv = errorLine.createEl('div');
-                errorInputDiv.createEl('span', { 
-                    text: `Wrong Input -> `
-                });
-                errorInputDiv.createEl('span', { 
-                    text: `"${error.key}: ${error.value}"`, 
-                    attr: { style: 'text-decoration: underline; font-style: italic;' } 
-                });
-
-                const errorMessageDiv = errorLine.createEl('div');
-                errorMessageDiv.createEl('span', { 
-                    text: `"${error.key}"`, 
-                    attr: { style: 'text-decoration: underline; font-style: italic;' } 
-                });
-                errorMessageDiv.createEl('span', { 
-                    text: ` ${error.message}`
-                });
-            });
-
-            errorDiv.createEl('div', { 
-                text: '\nPlease correct these errors and try again.'
-            });
-
-            return; // 구문 오류가 있으면 여기서 함수 실행을 종료합니다.
+            this.displayErrors(el, errors as SyntaxError[]);
         }
+    }
 
-        new KeywordCloud(el, ctx, this.settings, options).process();
+    private parseOptions(source: string): Record<string, string> {
+        return source.split('\n')
+            .map(line => line.trim())
+            .filter(Boolean)
+            .reduce((acc, line) => {
+                const [key, value] = line.split(':').map(part => part.trim());
+                if (key && value) {
+                    acc[key.toLowerCase()] = value;
+                }
+                return acc;
+            }, {} as Record<string, string>);
+    }
+
+    private displayErrors(el: HTMLElement, errors: SyntaxError[]) {
+        const errorDiv = el.createEl('div');
+        errorDiv.createEl('h5', { text: 'Syntax Errors:', attr: { class: 'error-header' } });
+
+        errors.forEach(error => {
+            const errorLine = errorDiv.createEl('div');
+            errorLine.createEl('div', {
+                text: `Wrong Input -> "${error.key}: ${error.value}"`,
+                attr: { style: 'text-decoration: underline; font-style: italic;' }
+            });
+            errorLine.createEl('div', {
+                text: `"${error.key}" ${error.message}`,
+                attr: { style: 'font-style: italic;' }
+            });
+        });
+
+        errorDiv.createEl('div', { text: '\nPlease correct these errors and try again.' });
     }
 }

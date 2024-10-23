@@ -1,9 +1,10 @@
-import { MarkdownPostProcessorContext, TFile } from 'obsidian';
-import { ChartType, SynapticRouteOptions } from './types';
+import { MarkdownPostProcessorContext } from 'obsidian';
+import { SynapticRouteOptions, KeywordCloudData } from './types';
 import { ObsidianUtils } from './obsidianUtils';
-import { SynapticRouteSettings, DEFAULT_SETTINGS, SynapticRouteSettingTab } from './settings';
-import { Chart, ChartConfiguration, ChartTypeRegistry} from 'chart.js/auto';
-
+import { SynapticRouteSettings} from './settings';
+import { HtmlToCanvas } from './htmlToCanvas';
+import { KeywordChart } from './keywordChart';
+import { KeywordTable } from './keywordTable';
 
 interface MatchedKeyword {
     path: string;
@@ -12,26 +13,15 @@ interface MatchedKeyword {
     hasKeywords: boolean;
 }
 
-interface KeywordCloudData {
-    keywordType: string;
-    displayName: string;
-    fileName: string;
-    rank: number;
-    score: number;
-    backlinkCountType: string;
-    backlinkCount: number;
-    cloudFactor: string;
-}
-
-
 export class KeywordCloud {
     private settings: SynapticRouteSettings;
     private el: HTMLElement;
     private ctx: MarkdownPostProcessorContext;
     private obsidianUtils: ObsidianUtils;
     private options: SynapticRouteOptions;
-    chartBackgroundColorPattern: string[];
-    chartBorderColorPattern: string[];
+    private buttonContainer: HTMLElement;
+    private keywordChart: KeywordChart;
+    private keywordTable: KeywordTable;
 
     constructor(el: HTMLElement, ctx: MarkdownPostProcessorContext, settings: SynapticRouteSettings, options: SynapticRouteOptions) {
         this.settings = settings;
@@ -39,8 +29,8 @@ export class KeywordCloud {
         this.ctx = ctx;
         this.obsidianUtils = ObsidianUtils.getInstance();
         this.options = options;
-        this.chartBackgroundColorPattern = ['#ff638455', '#36a2eb55', '#ffce5655', '#4bc0c055', '#9966ff55', '#ff9f4055']
-        this.chartBorderColorPattern = ['#ff6384', '#36a2eb', '#ffce56', '#4bc0c0', '#9966ff', '#ff9f40']
+        this.keywordChart = new KeywordChart(settings, options);
+        this.keywordTable = new KeywordTable(settings);
     }
 
     /* Main Functions*/
@@ -94,7 +84,10 @@ export class KeywordCloud {
             this.el.className = this.el.className.toLowerCase();
             // 렌더링된 HTML을 요소에 삽입
             this.el.innerHTML = renderedHTML;
-            this.addRefreshButton();
+
+            if(this.options.type === 'wordcloud' || this.options.type === 'chart'){
+                this.addButtons();
+            }
 
         } catch (error) {
             console.error("Error rendering keyword cloud:", error);
@@ -108,15 +101,44 @@ export class KeywordCloud {
 
     /* Sub Functions*/
 
+    private addButtons() {
+        this.addButtonContainer();
+        this.addRefreshButton();
+        this.addCaptureButton();
+        // 여기에 새로운 버튼을 추가할 수 있습니다.
+    }
+
+    private addButtonContainer() {
+        this.buttonContainer = this.el.createEl('div', {
+            cls: 'synaptic-route-button-container',
+        });
+        this.el.appendChild(this.buttonContainer);
+    }
+
     private addRefreshButton() {
-        const refreshButton = this.el.createEl('button', {
+        const refreshButton = this.buttonContainer.createEl('button', {
             text: '🔄',
-            cls: 'synaptic-route-refresh-button',
+            cls: 'synaptic-route-button synaptic-route-button-refresh',
         });
         refreshButton.addEventListener('click', () => {
             this.process();
         });
-        this.el.appendChild(refreshButton); // 이 줄을 추가합니다.
+    }
+
+    private addCaptureButton() {
+        const captureButton = this.buttonContainer.createEl('button', {
+            text: '📷',
+            cls: 'synaptic-route-button synaptic-route-button-capture',
+        });
+        captureButton.addEventListener('click', () => {
+            const containerElement = this.el.querySelector('.synaptic-route-container');
+            if (containerElement instanceof HTMLElement) {
+                HtmlToCanvas.captureElementToClipboard(containerElement);
+            } else {
+                console.error('Container element not found');
+                this.obsidianUtils.notice('Failed to capture: Container element not found');
+            }
+        });
     }
 
     render(arrKeywordCloudData: KeywordCloudData[]): string {
@@ -127,269 +149,15 @@ export class KeywordCloud {
             return this.getWordCloudHTMLFromArrKeywordCloudData(arrKeywordCloudData);
         }
         if(renderType == 'table'){
-            return this.getTableHTMLFromArrKeywordCloudData(arrKeywordCloudData);
+            return this.keywordTable.getTableHTMLFromArrKeywordCloudData(arrKeywordCloudData);
         }
         if(renderType == 'chart'){
-            return this.getChartHTMLFromArrKeywordCloudData(arrKeywordCloudData);
+            return this.keywordChart.getChartHTMLFromArrKeywordCloudData(arrKeywordCloudData);
         }
 
         // const html = this.getHTMLFromArrKeywordCloudData(arrKeywordCloudData);
 
         return ''
-    }
-
-    getChartHTMLFromArrKeywordCloudData(arrKeywordCloudData: KeywordCloudData[]): string {
-        const canvasId = `keyword-chart-${Math.random().toString(36).substr(2, 9)}`;
-        const html = `<div class="synaptic-route-container chart" style="width: 100%; height: 0; padding-bottom: 50%;"><canvas id="${canvasId}"></canvas></div>`;
-        let labels : string[] = []
-        
-        if(this.settings.keywordSelectionMethod === 'tags'){
-            labels = arrKeywordCloudData.map(t => `#${t.displayName}`);
-        }else{
-            labels = arrKeywordCloudData.map(t => `#${t.displayName.slice(2)}`);
-        }
-
-        const vaultName = this.obsidianUtils.getVaultName();
-        const links = arrKeywordCloudData.map(t => `obsidian://open?vault=${encodeURIComponent(vaultName)}&file=${encodeURIComponent(t.displayName)}`);
-        
-        setTimeout(() => {
-            const container = document.querySelector('.synaptic-route-container.chart') as HTMLElement;
-            const canvas = document.getElementById(canvasId) as HTMLCanvasElement;
-            const chartType = this.options.chartType as ChartType;
-            const ctx = canvas.getContext('2d');
-
-            if (ctx && container) {
-                const dpr = window.devicePixelRatio || 1;
-                
-                const updateCanvasSize = () => {
-                    const containerWidth = container.clientWidth;
-                    const containerHeight = container.clientHeight;
-                    canvas.width = containerWidth * dpr;
-                    canvas.height = containerHeight * dpr;
-                    canvas.style.width = `${containerWidth}px`;
-                    canvas.style.height = `${containerHeight}px`;
-                    ctx.scale(dpr, dpr);
-                };
-
-                let chart: Chart | null = null;
-
-                // 현재 Obsidian의 테마를 확인하는 함수 (이 함수는 Obsidian API에 따라 다를 수 있습니다)
-                const isCurrentThemeDark = () => document.body.classList.contains('theme-dark');
-
-                // 기본 색상 설정
-                Chart.defaults.color = isCurrentThemeDark() ? '#FFF' : '#000';
-
-                // 옵션에 따라 색상 재설정
-                if (this.options.theme === 'dark') {
-                    Chart.defaults.color = '#FFF';
-                } else if (this.options.theme === 'light') {
-                    Chart.defaults.color = '#000';
-                }
-
-                const createOrUpdateChart = () => {
-                    updateCanvasSize();
-
-                    // 현재 테마에 따른 색상 결정
-                    const currentColor = isCurrentThemeDark() ? '#E0E0E0' : '#333';
-                    const gridDefaultColor = isCurrentThemeDark() ? '#555' : '#CCC';
-                    // 옵션에 따른 색상 설정
-                    const themeColor = this.options.theme === 'dark' ? '#E0E0E0' : 
-                                       this.options.theme === 'light' ? '#333' : 
-                                       currentColor;
-
-                    const gridColor = this.options.theme === 'dark' ? '#555' : 
-                                       this.options.theme === 'light' ? '#CCC' : 
-                                       gridDefaultColor;
-
-                    const chartConfig: ChartConfiguration = {
-                        type: chartType as keyof ChartTypeRegistry,
-                        data: {
-                            labels: labels,
-                            datasets: [{
-                                label: 'Keywords Ranking',
-                                data: arrKeywordCloudData.map(t => t.score),
-                                backgroundColor: this.chartBackgroundColorPattern,
-                                borderColor: this.chartBorderColorPattern,
-                                borderWidth: 3,
-                                links: links
-                            } as any]  // 'as any'를 사용하여 타입 체크를 우회합니다.
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            devicePixelRatio: dpr,
-                            plugins: {
-                                legend: {
-                                    display: false  // 범례를 숨깁니다
-                                },
-                                title: {
-                                    display: true,
-                                    text: 'Keywords Ranking',
-                                    color: themeColor,
-                                    font: {
-                                        size: 18,
-                                        weight: 'bold',
-                                        family: "Pretendard Variable"
-                                    }
-                                }
-                            },
-                            layout: {
-                                padding: {
-                                    left: 10,
-                                    right: 10,
-                                    top: 10,
-                                    bottom: 10
-                                }
-                            },
-                            ...(chartType === 'bar' && {
-                                scales: {
-                                    x: {
-                                        grid: {
-                                            color: gridColor  
-                                        },
-                                        ticks: {
-                                            color: themeColor,
-                                            font: {
-                                                size: 13,
-                                                weight: 'normal',
-                                                family: "Pretendard Variable"
-                                            }
-                                        }
-                                    },
-                                    y: {
-                                        grid: {
-                                            color: gridColor 
-                                        },
-                                        ticks: {
-                                            color: themeColor,
-                                            font: {
-                                                size: 13,
-                                                weight: 'normal',
-                                                family: "Pretendard Variable"
-                                            }
-                                        }
-                                    }
-                                }
-                            }),
-                            onClick: async (event, elements) => {
-                                if (elements.length > 0 && chartConfig.data.labels) {
-                                    const elementIndex = elements[0].index;
-                                    let label = chartConfig.data.labels[elementIndex];
-                                    const link = (chartConfig.data.datasets[0] as any).links[elementIndex];
-                                    
-                                    if(this.settings.keywordSelectionMethod === 'fileNamePrefix'){
-                                        label = (label as string).slice(1);
-                                        label = this.settings.keywordSelectionInput + label;
-
-                                        if(this.obsidianUtils.isExistLink(label as string)){
-                                            const tFile = this.obsidianUtils.getTFileFromLinkDisplayName(label as string);
-                                            if(tFile) this.obsidianUtils.openFileFromTFile(tFile);
-                                        }else{
-                                            const tFile = await this.obsidianUtils.createLink(label as string);
-                                            this.obsidianUtils.openFileFromTFile(tFile);
-                                        }
-                                    }
-
-
-                                }
-                            }
-                        }
-                    };
-
-                    if (chart) {
-                        chart.destroy();
-                    }
-                    chart = new Chart(ctx, chartConfig);
-                };
-
-                // 디바운스 함수
-                const debounce = (func: Function, wait: number) => {
-                    let timeout: NodeJS.Timeout | null = null;
-                    return function(...args: any[]) {
-                        const later = () => {
-                            timeout = null;
-                            func(...args);
-                        };
-                        if (timeout) clearTimeout(timeout);
-                        timeout = setTimeout(later, wait);
-                    };
-                };
-
-                // 디바운스된 차트 업데이트 함수
-                const debouncedCreateOrUpdateChart = debounce(createOrUpdateChart, 250);
-
-                const resizeObserver = new ResizeObserver(() => {
-                    if (chart) {
-                        debouncedCreateOrUpdateChart();
-                    }
-                });
-                resizeObserver.observe(container);
-
-                const intersectionObserver = new IntersectionObserver((entries) => {
-                    entries.forEach((entry) => {
-                        if (entry.isIntersecting) {
-                            createOrUpdateChart();
-                        }
-                    });
-                }, { threshold: 0.1 });
-
-                intersectionObserver.observe(container);
-
-                // 초기 차트 생성
-                createOrUpdateChart();
-            }
-        }, 100);
-
-        return html;
-    }
-
-    getTableHTMLFromArrKeywordCloudData(arrKeywordCloudData: KeywordCloudData[]): string {
-
-        let tableRows = '';
-        let countTitle = '';
-
-        if(this.settings.keywordBacklinkType === 'allNotes'){
-            countTitle = 'All Links';
-        }else if(this.settings.keywordBacklinkType === 'permanentNotesOnly'){
-            countTitle = 'Permanent Links';
-        }
-        if(this.settings.keywordSelectionMethod === 'tags'){
-            tableRows = arrKeywordCloudData.map(item => `
-                <tr>
-                    <td>${item.rank}</td>
-                    <td><a href="#${item.displayName}" class="tag" target="_blank" rel="noopener nofollow">#${item.displayName}</a></td>
-                    <td>${item.score}</td>
-                    <td>${item.backlinkCount}</td>
-                </tr>
-            `).join('');
-        }else{
-            tableRows = arrKeywordCloudData.map(item => `
-                <tr>
-                    <td>${item.rank}</td>
-                    <td><span class="synaptic-route-table-link"><a data-tooltip-position="top" aria-label="${item.fileName}" data-href="${item.fileName}" href="${item.fileName}" class="internal-link" target="_blank" rel="noopener nofollow">${item.displayName}</a></span></td>
-                    <td>${item.score}</td>
-                    <td>${item.backlinkCount}</td>
-                </tr>
-            `).join('');
-        }
-
-        const tableHTML = `
-            <table class="synaptic-route-table">
-                <thead>
-                    <tr>
-                        <th>Rank</th>
-                        <th>Keyword</th>
-                        <th>Score</th>
-                        <th>${countTitle}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${tableRows}
-                </tbody>
-            </table>
-        `;
-
-        return tableHTML;
     }
 
     getWordCloudHTMLFromArrKeywordCloudData(arrKeywordCloudData: KeywordCloudData[]): string {
@@ -591,9 +359,6 @@ export class KeywordCloud {
                 }
             }
         });
-
-
-
         return inlinksCount;
     }
 
@@ -628,10 +393,3 @@ export class KeywordCloud {
         });
     }
 }
-
-
-
-
-
-
-

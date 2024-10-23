@@ -7,7 +7,7 @@ export default class SynapticRoute extends Plugin {
 	settings: SynapticRouteSettings;
 	private codeblockRouter: CodeblockRouter;
 
-	async onload() {
+	async onload(): Promise<void> {
 		await this.loadSettings();
 
 		ObsidianUtils.initialize(this.app);
@@ -17,7 +17,6 @@ export default class SynapticRoute extends Plugin {
 			this.codeblockRouter.processCodeblock("SynapticRoute", source, el, ctx);
 		});
 
-		// Add the new command
 		this.addCommand({
 			id: 'print-synaptic-route-settings',
 			name: 'Print Settings',
@@ -26,19 +25,18 @@ export default class SynapticRoute extends Plugin {
 			}
 		});
 
-		// 설정 탭 추가
 		this.addSettingTab(new SynapticRouteSettingTab(this.app, this));
 	}
 
-	onunload() {
-		// 정리 작업이 필요한 경우 여기에 추가하세요
+	onunload(): void {
+		// Add cleanup tasks here if needed
 	}
 
-	async loadSettings() {
+	async loadSettings(): Promise<void> {
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
 	}
 
-	async saveSettings() {
+	async saveSettings(): Promise<void> {
 		await this.saveData(this.settings);
 	}
 }

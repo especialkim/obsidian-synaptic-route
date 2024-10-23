@@ -1,4 +1,4 @@
-import { App, TFile, CachedMetadata, LinkCache, FrontmatterLinkCache, MarkdownView } from 'obsidian';
+import { App, TFile, CachedMetadata, Notice } from 'obsidian';
 
 // 파일 상단에 새로운 인터페이스 추가
 interface CommonLink {
@@ -276,6 +276,10 @@ export class ObsidianUtils {
 
     openFileFromTFile(tFile: TFile): void {
         this.app.workspace.getLeaf().openFile(tFile);
+    }
+
+    notice(message: string): void {
+        new Notice(message);
     }
 
     /* Typescript, Javascript 기본 문법만 사용 */

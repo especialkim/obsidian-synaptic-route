@@ -27,74 +27,53 @@ import { ChartTypeRegistry } from 'chart.js';
 
 
 export class SyntaxValidator {
-    static validate(options: Record<string, string>): SynapticRouteOptions {
-        const validatedOptions: SynapticRouteOptions = {
-            type: 'wordcloud',
-            chartType: 'bar', // Add this line
-            global: false,
-            maxItem: 30,
-            maxRandomItem: 5,
-            theme: 'default'
-        };
+    private static readonly DEFAULT_OPTIONS: SynapticRouteOptions = {
+        type: 'wordcloud',
+        chartType: 'bar',
+        global: false,
+        maxItem: 30,
+        maxRandomItem: 5,
+        theme: 'default'
+    };
 
+    private static readonly VALID_KEYS = ['type', 'charttype', 'global', 'maxitem', 'maxrandomitem', 'theme'];
+
+    static validate(options: Record<string, string>): SynapticRouteOptions {
+        const validatedOptions = { ...this.DEFAULT_OPTIONS };
         const errors: SyntaxError[] = [];
 
-        if (options['type']) {
-            try {
-                validatedOptions.type = this.validateType(options['type']);
-            } catch (error) {
-                errors.push({ key: 'Type', value: options['type'], message: error.message });
+        Object.entries(options).forEach(([key, value]) => {
+            const lowerKey = key.toLowerCase();
+            if (!this.VALID_KEYS.includes(lowerKey)) {
+                errors.push(this.createError(key, value, `Invalid key. Valid keys are: ${this.VALID_KEYS.map(k => `'${k}'`).join(', ')}`));
+                return;
             }
-        }
 
-        if (validatedOptions.type === 'chart') {
             try {
-                validatedOptions.chartType = this.validateChartType(options['charttype']);
+                switch (lowerKey) {
+                    case 'type':
+                        validatedOptions.type = this.validateType(value);
+                        break;
+                    case 'charttype':
+                        if (validatedOptions.type === 'chart') {
+                            validatedOptions.chartType = this.validateChartType(value);
+                        }
+                        break;
+                    case 'global':
+                        validatedOptions.global = this.validateGlobal(value);
+                        break;
+                    case 'maxitem':
+                        validatedOptions.maxItem = this.validateNumber(value, 'MaxItem');
+                        break;
+                    case 'maxrandomitem':
+                        validatedOptions.maxRandomItem = this.validateNumber(value, 'MaxRandomItem');
+                        break;
+                    case 'theme':
+                        validatedOptions.theme = this.validateTheme(value);
+                        break;
+                }
             } catch (error) {
-                errors.push({ key: 'ChartType', value: options['charttype'], message: error.message });
-            }
-        }
-
-        if (options['global']) {
-            try {
-                validatedOptions.global = this.validateGlobal(options['global']);
-            } catch (error) {
-                errors.push({ key: 'Global', value: options['global'], message: error.message });
-            }
-        }
-
-        if (options['maxitem']) {
-            try {
-                validatedOptions.maxItem = this.validateNumber(options['maxitem'], 'MaxItem');
-            } catch (error) {
-                errors.push({ key: 'MaxItem', value: options['maxitem'], message: error.message });
-            }
-        }
-
-        if (options['maxrandomitem']) {
-            try {
-                validatedOptions.maxRandomItem = this.validateNumber(options['maxrandomitem'], 'MaxRandomItem');
-            } catch (error) {
-                errors.push({ key: 'MaxRandomItem', value: options['maxrandomitem'], message: error.message });
-            }
-        }
-
-        if (options['theme']) {
-            try {
-                validatedOptions.theme = this.validateTheme(options['theme']);
-            } catch (error) {
-                errors.push({ key: 'Theme', value: options['theme'], message: error.message });
-            }
-        }
-
-        const validKeys = ['type', 'charttype', 'global', 'maxitem', 'maxrandomitem', 'theme'];
-        Object.keys(options).forEach(key => {
-            if (!validKeys.includes(key.toLowerCase())) {
-                errors.push({ 
-                    key: key, 
-                    value: options[key], 
-                    message: `Invalid key. Valid keys are: ${validKeys.map(key => `'${key}'`).join(', ')}`
-                });
+                errors.push(this.createError(key, value, error.message));
             }
         });
 
@@ -105,22 +84,16 @@ export class SyntaxValidator {
         return validatedOptions;
     }
 
-    private static validateType(value: string): SynapticRouteType {
-        const validTypes: SynapticRouteType[] = ['wordcloud', 'chart', 'table'];
-        const normalizedValue = value.toLowerCase();
-        if (!validTypes.some(type => type.toLowerCase() === normalizedValue)) {
-            throw new Error(`Must be one of: ${validTypes.map(type => `'${type}'`).join(', ')}`);
-        }
-        return validTypes.find(type => type.toLowerCase() === normalizedValue) as SynapticRouteType;
+    private static createError(key: string, value: string, message: string): SyntaxError {
+        return { key, value, message };
     }
 
-    private static validateChartType(value: string | undefined): keyof ChartTypeRegistry {
-        const validChartTypes: (keyof ChartTypeRegistry)[] = ['bar', 'line', 'pie', 'doughnut', 'polarArea'];
-        const normalizedValue = value ? value.toLowerCase() : 'bar';
-        if (!validChartTypes.some(type => type.toLowerCase() === normalizedValue)) {
-            throw new Error(`Must be one of: ${validChartTypes.join(', ')}`);
-        }
-        return validChartTypes.find(type => type.toLowerCase() === normalizedValue) as keyof ChartTypeRegistry;
+    private static validateType(value: string): SynapticRouteType {
+        return this.validateEnum<SynapticRouteType>(['wordcloud', 'chart', 'table'], value, 'Type');
+    }
+
+    private static validateChartType(value: string): keyof ChartTypeRegistry {
+        return this.validateEnum<keyof ChartTypeRegistry>(['bar', 'line', 'pie', 'doughnut', 'polarArea'], value, 'ChartType');
     }
 
     private static validateGlobal(value: string): boolean {
@@ -139,11 +112,14 @@ export class SyntaxValidator {
     }
 
     private static validateTheme(value: string): Theme {
-        const validThemes: Theme[] = ['dark', 'light'];
+        return this.validateEnum<Theme>(['dark', 'light'], value, 'Theme');
+    }
+
+    private static validateEnum<T extends string>(validValues: T[], value: string, name: string): T {
         const normalizedValue = value.toLowerCase();
-        if (!validThemes.some(theme => theme.toLowerCase() === normalizedValue)) {
-            throw new Error(`Must be one of: ${validThemes.map(theme => `'${theme}'`).join(', ')}`);
+        if (!validValues.some(v => v.toLowerCase() === normalizedValue)) {
+            throw new Error(`Must be one of: ${validValues.map(v => `'${v}'`).join(', ')}`);
         }
-        return validThemes.find(theme => theme.toLowerCase() === normalizedValue) as Theme;
+        return validValues.find(v => v.toLowerCase() === normalizedValue) as T;
     }
 }

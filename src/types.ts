@@ -18,3 +18,14 @@ export interface SyntaxError {
     value: string;
     message: string;
 }
+
+export interface KeywordCloudData {
+    keywordType: string;
+    displayName: string;
+    fileName: string;
+    rank: number;
+    score: number;
+    backlinkCountType: string;
+    backlinkCount: number;
+    cloudFactor: string;
+}
