@@ -18,7 +18,7 @@ export interface SynapticRouteSettings {
 export const DEFAULT_SETTINGS: SynapticRouteSettings = {
     keywordSelectionMethod: 'tags',
     keywordSelectionInput: '',
-    keywordBacklinkType: 'permanentNotesOnly',
+    keywordBacklinkType: 'allNotes',
     permanentNoteSelectionMethod: 'folderPath',
     permanentNoteSelectionInput: '',
     lucyZettelkastenEnabled: false,
